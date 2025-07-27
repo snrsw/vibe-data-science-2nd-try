@@ -35,29 +35,41 @@ class LightGBMModel(BaseModel):
 
         self.feature_names: list[str] = X_train.columns
 
-        self.classes: list = sorted(y_train.unique().to_list())
+        # Convert categorical targets to numeric indices
+        unique_classes: list = sorted(y_train.unique().to_list())
+        self.classes: list = unique_classes
+        
+        # Create a mapping of class names to numeric indices
+        class_to_idx = {class_name: idx for idx, class_name in enumerate(unique_classes)}
+        
+        # Convert target values to numeric indices with explicit return_dtype
+        y_train_numeric = y_train.map_elements(lambda x: class_to_idx.get(x, 0), return_dtype=pl.Int32)
+        y_val_numeric = None if y_val is None else y_val.map_elements(lambda x: class_to_idx.get(x, 0), return_dtype=pl.Int32)
 
         dtrain: lgb.Dataset = lgb.Dataset(
             X_train.to_numpy(),
-            label=y_train.to_numpy(),
+            label=y_train_numeric.to_numpy(),
             feature_name=self.feature_names,
         )
 
         eval_results: Dict[str, Dict[str, list[float]]] = {}
-        eval_set: Optional[list[tuple[np.ndarray, np.ndarray]]] = None
-        if X_val is not None and y_val is not None:
-            eval_set = [
-                (
-                    X_val.to_numpy(),
-                    y_val.to_numpy(),
-                )
-            ]
+        eval_datasets = [dtrain]
+        valid_names = ["train"]
+        
+        if X_val is not None and y_val is not None and y_val_numeric is not None:
+            dval = lgb.Dataset(
+                X_val.to_numpy(),
+                label=y_val_numeric.to_numpy(),
+                feature_name=self.feature_names,
+            )
+            eval_datasets.append(dval)
+            valid_names.append("valid")
 
         self.model = lgb.train(
             params=self.model_params,
             train_set=dtrain,
-            valid_sets=[dtrain] + (eval_set or []),
-            valid_names=["train"] + (["valid"] if eval_set else []),
+            valid_sets=eval_datasets,
+            valid_names=valid_names,
             callbacks=[lgb.record_evaluation(eval_results)],
         )
 

@@ -15,7 +15,7 @@ def load_penguin_data(file_path: str | Path) -> pl.DataFrame:
 
     logger.info("Loading penguin dataset", path=str(path))
 
-    df: pl.DataFrame = pl.read_csv(source=path)
+    df: pl.DataFrame = pl.read_csv(source=path, null_values=["NA"])
 
     missing_columns = set(PenguinDataSchema.column_names) - set(df.columns)
     if missing_columns:

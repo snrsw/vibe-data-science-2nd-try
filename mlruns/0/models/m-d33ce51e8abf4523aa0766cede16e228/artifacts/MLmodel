@@ -1,0 +1,34 @@
+artifact_path: /Users/jmb20230001/src/github.com/snrsw/vibe-data-science-2nd-try/mlruns/0/models/m-d33ce51e8abf4523aa0766cede16e228/artifacts
+flavors:
+  lightgbm:
+    code: null
+    data: model.lgb
+    lgb_version: 4.6.0
+    model_class: lightgbm.basic.Booster
+  python_function:
+    data: model.lgb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.lightgbm
+    python_version: 3.13.5
+is_signature_from_type_hint: false
+mlflow_version: 3.1.4
+model_id: m-d33ce51e8abf4523aa0766cede16e228
+model_size_bytes: 248528
+model_uuid: m-d33ce51e8abf4523aa0766cede16e228
+prompts: null
+run_id: fc4193ad01d8462cb49b2194cbce29eb
+signature:
+  inputs: '[{"type": "float", "name": "culmen_length_mm", "required": true}, {"type":
+    "float", "name": "culmen_depth_mm", "required": true}, {"type": "float", "name":
+    "flipper_length_mm", "required": true}, {"type": "float", "name": "body_mass_g",
+    "required": true}, {"type": "integer", "name": "island_Torgersen", "required":
+    true}, {"type": "integer", "name": "island_Biscoe", "required": true}, {"type":
+    "integer", "name": "island_Dream", "required": true}, {"type": "integer", "name":
+    "sex_MALE", "required": true}, {"type": "integer", "name": "sex_FEMALE", "required":
+    true}]'
+  outputs: '[{"type": "string", "name": "species", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-07-27 05:14:34.334525'

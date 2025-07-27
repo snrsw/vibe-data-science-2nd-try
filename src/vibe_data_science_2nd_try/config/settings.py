@@ -59,7 +59,7 @@ class ModelConfig(BaseModel):
 
 
 class MLFlowConfig(BaseModel):
-    tracking_uri: str = "duckdb+artifact:///mlflow-artifacts/mlruns.duckdb"
+    tracking_uri: str = "sqlite:///mlflow-artifacts/mlflow.db"
     experiment_name: str = "penguin-classification"
     register_model: bool = True
     log_artifacts: bool = True
