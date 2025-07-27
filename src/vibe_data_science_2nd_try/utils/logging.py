@@ -21,9 +21,8 @@ def configure_logging(
         output_path: Path to output log file (logs to stdout if None)
         include_timestamp: Whether to include timestamps in log entries
     """
-    log_level = getattr(logging, level)
+    log_level: int = getattr(logging, level)
 
-    # Configure standard library logging
     handlers: list[Any] = [logging.StreamHandler(sys.stdout)]
     if output_path:
         handlers.append(logging.FileHandler(output_path))
@@ -34,8 +33,7 @@ def configure_logging(
         handlers=handlers,
     )
 
-    # Configure processors for structlog
-    processors = [
+    processors: list = [
         structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
@@ -43,11 +41,9 @@ def configure_logging(
         structlog.processors.StackInfoRenderer(),
     ]
 
-    # Add timestamp if requested
     if include_timestamp:
         processors.append(TimeStamper(fmt="%Y-%m-%d %H:%M:%S"))
 
-    # Add formatters
     processors.extend(
         [
             structlog.processors.format_exc_info,
@@ -56,7 +52,6 @@ def configure_logging(
         ]
     )
 
-    # Configure structlog
     structlog.configure(
         processors=processors,
         logger_factory=LoggerFactory(),

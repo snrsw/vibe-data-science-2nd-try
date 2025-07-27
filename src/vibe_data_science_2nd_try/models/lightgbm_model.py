@@ -16,7 +16,6 @@ class LightGBMModel(BaseModel):
     def __init__(self, model_params: Dict[str, Any]):
         super().__init__(model_params)
 
-        # Ensure required params for classification
         if "objective" not in self.model_params:
             self.model_params["objective"] = "multiclass"
         if (
@@ -34,22 +33,18 @@ class LightGBMModel(BaseModel):
     ) -> Dict[str, float]:
         logger.info("Training LightGBM model", params=self.model_params)
 
-        # Store feature names
-        self.feature_names = X_train.columns
+        self.feature_names: list[str] = X_train.columns
 
-        # Get unique classes from target
-        self.classes = sorted(y_train.unique().to_list())
+        self.classes: list = sorted(y_train.unique().to_list())
 
-        # Create training dataset
-        dtrain = lgb.Dataset(
+        dtrain: lgb.Dataset = lgb.Dataset(
             X_train.to_numpy(),
             label=y_train.to_numpy(),
             feature_name=self.feature_names,
         )
 
-        # Create validation dataset if provided
         eval_results: Dict[str, Dict[str, list[float]]] = {}
-        eval_set = None
+        eval_set: Optional[list[tuple[np.ndarray, np.ndarray]]] = None
         if X_val is not None and y_val is not None:
             eval_set = [
                 (
@@ -58,7 +53,6 @@ class LightGBMModel(BaseModel):
                 )
             ]
 
-        # Train the model
         self.model = lgb.train(
             params=self.model_params,
             train_set=dtrain,
@@ -67,8 +61,7 @@ class LightGBMModel(BaseModel):
             callbacks=[lgb.record_evaluation(eval_results)]
         )
 
-        # Get final metrics
-        metrics = {}
+        metrics: Dict[str, float] = {}
         if eval_results and "valid" in eval_results:
             for metric_name, values in eval_results["valid"].items():
                 metrics[f"val_{metric_name}"] = values[-1]
@@ -86,12 +79,10 @@ class LightGBMModel(BaseModel):
 
         logger.info("Generating predictions with LightGBM model", rows=X.shape[0])
 
-        # Make predictions
-        y_pred_proba = self.model.predict(X.to_numpy())
-        y_pred = np.argmax(y_pred_proba, axis=1)
+        y_pred_proba: np.ndarray = self.model.predict(X.to_numpy())
+        y_pred: np.ndarray = np.argmax(y_pred_proba, axis=1)
 
-        # Convert numeric predictions to class labels
-        predictions = pl.Series(
+        predictions: pl.Series = pl.Series(
             name="predicted_species", values=[self.classes[i] for i in y_pred]
         )
 
@@ -101,10 +92,9 @@ class LightGBMModel(BaseModel):
         if self.model is None:
             raise ValueError("Model not trained yet")
 
-        save_path = Path(path)
+        save_path: Path = Path(path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Save the model file
         joblib.dump(
             {
                 "model": self.model,
@@ -124,11 +114,9 @@ class LightGBMModel(BaseModel):
         if not load_path.exists():
             raise FileNotFoundError(f"Model file not found: {load_path}")
 
-        # Load the model
-        saved_data = joblib.load(load_path)
+        saved_data: Dict[str, Any] = joblib.load(load_path)
 
-        # Create a new model instance
-        model_instance = cls({})
+        model_instance: LightGBMModel = cls({})
         model_instance.model = saved_data["model"]
         model_instance.feature_names = saved_data["feature_names"]
         model_instance.classes = saved_data["classes"]
@@ -141,11 +129,9 @@ class LightGBMModel(BaseModel):
         if self.model is None:
             raise ValueError("Model not trained yet")
 
-        # Get feature importance from model
-        importance = self.model.feature_importance(importance_type="gain")
+        importance: np.ndarray = self.model.feature_importance(importance_type="gain")
 
-        # Map feature names to importance
-        result = {}
+        result: Dict[str, float] = {}
         for idx, name in enumerate(self.feature_names):
             if idx < len(importance):
                 result[name] = float(importance[idx])
