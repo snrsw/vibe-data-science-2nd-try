@@ -1,2 +1,3 @@
-def hello() -> str:
-    return "Hello from vibe-data-science-2nd-try!"
+from importlib import metadata
+
+__version__ = metadata.version("vibe-data-science-2nd-try")

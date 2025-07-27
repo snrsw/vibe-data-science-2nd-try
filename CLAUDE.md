@@ -80,3 +80,8 @@ See `docs/problem.md` for the problem statement, inputs, outputs, and evaluation
 * Use t-wada's TDD style (see Japanese resources for more tdetails).
 * Plan first, then implement if the owner agrees with the plan.
 * Check linting and type checking before committing code.
+* Run tests before committing code.
+
+## Pipeline Architecture
+
+See `docs/pipeline_architecture.md` for the data flow and directory structure of the ML pipeline.
