@@ -1,5 +1,6 @@
 import os
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional, Union, cast
 
@@ -22,10 +23,16 @@ def setup_mlflow(config: MLFlowConfig) -> None:
     Args:
         config: MLFlow configuration
     """
+    experiment_name = config.experiment_name
+    if config.use_datetime_in_experiment_name:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        experiment_name = f"{experiment_name}_{timestamp}"
+    
     logger.info(
         "Setting up MLflow",
         tracking_uri=config.tracking_uri,
-        experiment_name=config.experiment_name,
+        artifact_location=config.artifact_location,
+        experiment_name=experiment_name,
     )
 
     typed_mlflow = cast(MLflowModule, mlflow)
@@ -33,14 +40,23 @@ def setup_mlflow(config: MLFlowConfig) -> None:
 
     try:
         try:
-            experiment = typed_mlflow.get_experiment_by_name(config.experiment_name)
+            experiment = typed_mlflow.get_experiment_by_name(experiment_name)
             if experiment:
                 logger.info(
                     "Using existing experiment", experiment_id=experiment.experiment_id
                 )
             else:
-                experiment_id = typed_mlflow.create_experiment(config.experiment_name)
-                logger.info("Created new experiment", experiment_id=experiment_id)
+                # Use specified artifact location when creating a new experiment
+                artifact_location = config.artifact_location
+                experiment_id = typed_mlflow.create_experiment(
+                    name=experiment_name,
+                    artifact_location=artifact_location
+                )
+                logger.info(
+                    "Created new experiment",
+                    experiment_id=experiment_id,
+                    artifact_location=artifact_location
+                )
         except MlflowException as e:
             logger.error("Error getting/creating experiment", error=str(e))
             raise

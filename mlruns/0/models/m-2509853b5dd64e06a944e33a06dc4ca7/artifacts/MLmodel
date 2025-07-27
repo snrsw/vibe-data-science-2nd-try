@@ -1,4 +1,4 @@
-artifact_path: /Users/jmb20230001/src/github.com/snrsw/vibe-data-science-2nd-try/mlruns/0/models/m-d33ce51e8abf4523aa0766cede16e228/artifacts
+artifact_path: /Users/jmb20230001/src/github.com/snrsw/vibe-data-science-2nd-try/mlruns/0/models/m-2509853b5dd64e06a944e33a06dc4ca7/artifacts
 flavors:
   lightgbm:
     code: null
@@ -14,11 +14,11 @@ flavors:
     python_version: 3.13.5
 is_signature_from_type_hint: false
 mlflow_version: 3.1.4
-model_id: m-d33ce51e8abf4523aa0766cede16e228
+model_id: m-2509853b5dd64e06a944e33a06dc4ca7
 model_size_bytes: 248528
-model_uuid: m-d33ce51e8abf4523aa0766cede16e228
+model_uuid: m-2509853b5dd64e06a944e33a06dc4ca7
 prompts: null
-run_id: fc4193ad01d8462cb49b2194cbce29eb
+run_id: 3e819e30ad8b4c6f8f7b0c99cbd4b64a
 signature:
   inputs: '[{"type": "float", "name": "culmen_length_mm", "required": true}, {"type":
     "float", "name": "culmen_depth_mm", "required": true}, {"type": "float", "name":
@@ -31,4 +31,4 @@ signature:
   outputs: '[{"type": "string", "name": "species", "required": true}]'
   params: null
 type_hint_from_example: false
-utc_time_created: '2025-07-27 05:14:34.334525'
+utc_time_created: '2025-07-27 05:22:40.010452'

@@ -60,9 +60,11 @@ class ModelConfig(BaseModel):
 
 class MLFlowConfig(BaseModel):
     tracking_uri: str = "sqlite:///mlflow-artifacts/mlflow.db"
+    artifact_location: str = "file:/tmp/mlflow-artifacts/mlruns"
     experiment_name: str = "penguin-classification"
     register_model: bool = True
     log_artifacts: bool = True
+    use_datetime_in_experiment_name: bool = True
 
 
 class PipelineConfig(BaseSettings):
