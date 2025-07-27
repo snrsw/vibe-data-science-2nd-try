@@ -15,25 +15,25 @@ def configure_logging(
 ) -> None:
     """
     Configure structlog for the application.
-    
+
     Args:
         level: The log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         output_path: Path to output log file (logs to stdout if None)
         include_timestamp: Whether to include timestamps in log entries
     """
     log_level = getattr(logging, level)
-    
+
     # Configure standard library logging
     handlers: list[Any] = [logging.StreamHandler(sys.stdout)]
     if output_path:
         handlers.append(logging.FileHandler(output_path))
-    
+
     logging.basicConfig(
         format="%(message)s",
         level=log_level,
         handlers=handlers,
     )
-    
+
     # Configure processors for structlog
     processors = [
         structlog.stdlib.filter_by_level,
@@ -42,23 +42,24 @@ def configure_logging(
         structlog.processors.dict_tracebacks,
         structlog.processors.StackInfoRenderer(),
     ]
-    
+
     # Add timestamp if requested
     if include_timestamp:
         processors.append(TimeStamper(fmt="%Y-%m-%d %H:%M:%S"))
-    
+
     # Add formatters
-    processors.extend([
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer(),
-    ])
-    
+    processors.extend(
+        [
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            structlog.processors.JSONRenderer(),
+        ]
+    )
+
     # Configure structlog
     structlog.configure(
         processors=processors,
         logger_factory=LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
 
@@ -66,10 +67,10 @@ def configure_logging(
 def get_logger(name: str = "") -> structlog.stdlib.BoundLogger:
     """
     Get a configured structlog logger.
-    
+
     Args:
         name: Optional name for the logger
-        
+
     Returns:
         A configured structlog logger
     """

@@ -1,4 +1,3 @@
-
 import polars as pl
 import pytest
 from unittest.mock import MagicMock, patch
@@ -20,12 +19,14 @@ def sample_model_params():
 
 @pytest.fixture
 def sample_features():
-    return pl.DataFrame({
-        "culmen_length_mm": [39.1, 49.3, 46.5, 38.6, 45.7, 48.8],
-        "culmen_depth_mm": [18.7, 19.9, 17.9, 17.8, 17.3, 19.5],
-        "flipper_length_mm": [181.0, 203.0, 217.0, 193.0, 222.0, 197.0],
-        "body_mass_g": [3750.0, 3650.0, 4800.0, 3700.0, 5200.0, 3500.0],
-    })
+    return pl.DataFrame(
+        {
+            "culmen_length_mm": [39.1, 49.3, 46.5, 38.6, 45.7, 48.8],
+            "culmen_depth_mm": [18.7, 19.9, 17.9, 17.8, 17.3, 19.5],
+            "flipper_length_mm": [181.0, 203.0, 217.0, 193.0, 222.0, 197.0],
+            "body_mass_g": [3750.0, 3650.0, 4800.0, 3700.0, 5200.0, 3500.0],
+        }
+    )
 
 
 @pytest.fixture
@@ -47,7 +48,9 @@ def test_lightgbm_model_init(sample_model_params):
 
 
 @patch("lightgbm.train")
-def test_lightgbm_model_train(mock_train, sample_features, sample_target, sample_model_params):
+def test_lightgbm_model_train(
+    mock_train, sample_features, sample_target, sample_model_params
+):
     # Mock the lightgbm.train function
     mock_model = MagicMock()
     mock_train.return_value = mock_model
@@ -70,7 +73,9 @@ def test_lightgbm_model_train(mock_train, sample_features, sample_target, sample
 
 
 @patch("lightgbm.train")
-def test_lightgbm_model_train_with_validation(mock_train, sample_features, sample_target, sample_model_params):
+def test_lightgbm_model_train_with_validation(
+    mock_train, sample_features, sample_target, sample_model_params
+):
     # Mock the lightgbm.train function
     mock_model = MagicMock()
     mock_train.return_value = mock_model
@@ -83,7 +88,7 @@ def test_lightgbm_model_train_with_validation(mock_train, sample_features, sampl
         sample_features,
         sample_target,
         sample_features.slice(0, 2),
-        sample_target.slice(0, 2)
+        sample_target.slice(0, 2),
     )
 
     # Check that lightgbm.train was called with validation set
@@ -93,7 +98,9 @@ def test_lightgbm_model_train_with_validation(mock_train, sample_features, sampl
 
 
 @patch("lightgbm.train")
-def test_lightgbm_model_predict(mock_train, sample_features, sample_target, sample_model_params):
+def test_lightgbm_model_predict(
+    mock_train, sample_features, sample_target, sample_model_params
+):
     # Mock the lightgbm.train function
     mock_model = MagicMock()
     mock_model.predict.return_value = [
@@ -127,7 +134,9 @@ def test_lightgbm_model_predict(mock_train, sample_features, sample_target, samp
 
 @patch("lightgbm.train")
 @patch("joblib.dump")
-def test_lightgbm_model_save(mock_dump, mock_train, sample_features, sample_target, sample_model_params, tmp_path):
+def test_lightgbm_model_save(
+    mock_dump, mock_train, sample_features, sample_target, sample_model_params, tmp_path
+):
     # Mock the lightgbm.train function
     mock_model = MagicMock()
     mock_train.return_value = mock_model

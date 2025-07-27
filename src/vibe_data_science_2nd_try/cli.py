@@ -16,7 +16,7 @@ class TrainSettings(BaseSettings):
         env_prefix="VIBE_TRAIN_",
         env_nested_delimiter="__",
     )
-    
+
     config_path: Optional[Path] = None
     data_path: Optional[Path] = None
     model_type: Optional[str] = None
@@ -28,7 +28,7 @@ class PredictSettings(BaseSettings):
         env_prefix="VIBE_PREDICT_",
         env_nested_delimiter="__",
     )
-    
+
     model_path: Path
     data_path: Path
     output_path: Path = Path("predictions.csv")
@@ -44,10 +44,10 @@ def initialize_environment(
         output_path=config.log.output_path,
         include_timestamp=config.log.include_timestamp,
     )
-    
+
     # Set up MLflow
     setup_mlflow(config.mlflow)
-    
+
     # Ensure output directory exists
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -55,38 +55,44 @@ def initialize_environment(
 def train(settings: Optional[TrainSettings] = None) -> None:
     """
     Train a penguin species classification model.
-    
+
     Args:
         settings: Training settings
     """
     if settings is None:
         settings = TrainSettings()
-    
+
     # Load configuration
     try:
         config = load_config(settings.config_path)
-        
+
         # Override config values if specified
         if settings.data_path:
             config.data.input_path = settings.data_path
         if settings.model_type:
             if settings.model_type in ["lightgbm", "xgboost", "catboost"]:
-                config.model.model_type = settings.model_type
+                # Use the validated value directly
+                if settings.model_type == "lightgbm":
+                    config.model.model_type = "lightgbm"
+                elif settings.model_type == "xgboost":
+                    config.model.model_type = "xgboost"
+                elif settings.model_type == "catboost":
+                    config.model.model_type = "catboost"
             else:
                 logger.warning(
                     "Invalid model_type, using default",
                     invalid_type=settings.model_type,
-                    default=config.model.model_type
+                    default=config.model.model_type,
                 )
         if settings.output_dir:
             config.output_dir = settings.output_dir
-        
+
         # Initialize environment
         initialize_environment(config)
-        
+
         # Run pipeline
         run_pipeline(config)
-    
+
     except Exception as e:
         logger.exception("Error in training command", error=str(e))
         raise SystemExit(1)
@@ -95,30 +101,36 @@ def train(settings: Optional[TrainSettings] = None) -> None:
 def predict(settings: Optional[PredictSettings] = None) -> None:
     """
     Generate predictions using a trained model.
-    
+
     Args:
         settings: Prediction settings
     """
     if settings is None:
         try:
-            settings = PredictSettings()
+            # We need to provide the required parameters
+            settings = PredictSettings(
+                model_path=Path("./output/lightgbm_model/model.pkl"),
+                data_path=Path("./data/penguins_size.csv"),
+            )
         except Exception as e:
             logger.exception("Error loading prediction settings", error=str(e))
             raise SystemExit(1)
-    
+
     # Load configuration
     try:
         config = load_config(settings.config_path)
-        
+
         # Initialize environment
         initialize_environment(config)
-        
+
         # Override data path
         config.data.input_path = settings.data_path
-        
+
         # Run prediction
-        run_prediction(settings.model_path, settings.data_path, settings.output_path, config)
-    
+        run_prediction(
+            settings.model_path, settings.data_path, settings.output_path, config
+        )
+
     except Exception as e:
         logger.exception("Error in prediction command", error=str(e))
         raise SystemExit(1)
@@ -129,13 +141,15 @@ def main() -> None:
     Main entry point for the CLI.
     """
     import sys
-    
+
     if len(sys.argv) < 2:
-        print("Usage: python -m vibe_data_science_2nd_try.cli [train|predict] [options]")
+        print(
+            "Usage: python -m vibe_data_science_2nd_try.cli [train|predict] [options]"
+        )
         sys.exit(1)
-    
+
     command = sys.argv[1]
-    
+
     if command == "train":
         train()
     elif command == "predict":

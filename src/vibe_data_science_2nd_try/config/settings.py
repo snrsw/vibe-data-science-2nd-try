@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,11 +21,11 @@ class DataConfig(BaseModel):
 class ModelConfig(BaseModel):
     model_type: Literal["lightgbm", "xgboost", "catboost"] = "lightgbm"
     hyperparameters: dict[str, Any] = {}
-    
+
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         model_type = self.model_type
-        
+
         # Apply default hyperparameters if none provided
         if not self.hyperparameters:
             if model_type == "lightgbm":
@@ -72,7 +72,7 @@ class PipelineConfig(BaseSettings):
         env_nested_delimiter="__",
         validate_default=True,
     )
-    
+
     log: LogConfig = LogConfig()
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()

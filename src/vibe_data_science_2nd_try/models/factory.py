@@ -11,14 +11,14 @@ logger = structlog.get_logger()
 def create_model(model_type: str, model_params: Dict[str, Any]) -> BaseModel:
     """
     Create a model instance of the specified type.
-    
+
     Args:
         model_type: Type of model to create
         model_params: Parameters for the model
-        
+
     Returns:
         A model instance of the specified type
-        
+
     Raises:
         ValueError: If the specified model type is not supported
     """

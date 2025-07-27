@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class PenguinSpecies(str, Enum):
     ADELIE = "Adelie"
-    CHINSTRAP = "Chinstrap" 
+    CHINSTRAP = "Chinstrap"
     GENTOO = "Gentoo"
 
 
@@ -42,21 +42,21 @@ class PenguinDataSchema(BaseModel):
         "body_mass_g",
         "sex",
     ]
-    
+
     feature_columns: ClassVar[list[str]] = [
         "culmen_length_mm",
-        "culmen_depth_mm", 
+        "culmen_depth_mm",
         "flipper_length_mm",
         "body_mass_g",
     ]
-    
+
     categorical_columns: ClassVar[list[str]] = [
         "island",
         "sex",
     ]
-    
+
     target_column: ClassVar[str] = "species"
-    
+
     dtypes: ClassVar[dict[str, Any]] = {
         "species": pl.Categorical,
         "island": pl.Categorical,
