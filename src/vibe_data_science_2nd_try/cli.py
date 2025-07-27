@@ -38,35 +38,24 @@ class PredictSettings(BaseSettings):
 def initialize_environment(
     config: PipelineConfig,
 ) -> None:
-    # Set up logging
     configure_logging(
         level=config.log.level,
         output_path=config.log.output_path,
         include_timestamp=config.log.include_timestamp,
     )
 
-    # Set up MLflow
     setup_mlflow(config.mlflow)
 
-    # Ensure output directory exists
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
 
 def train(settings: Optional[TrainSettings] = None) -> None:
-    """
-    Train a penguin species classification model.
-
-    Args:
-        settings: Training settings
-    """
     if settings is None:
         settings = TrainSettings()
 
-    # Load configuration
     try:
         config = load_config(settings.config_path)
 
-        # Override config values if specified
         if settings.data_path:
             config.data.input_path = settings.data_path
         if settings.model_type:
@@ -87,10 +76,8 @@ def train(settings: Optional[TrainSettings] = None) -> None:
         if settings.output_dir:
             config.output_dir = settings.output_dir
 
-        # Initialize environment
         initialize_environment(config)
 
-        # Run pipeline
         run_pipeline(config)
 
     except Exception as e:
@@ -99,15 +86,8 @@ def train(settings: Optional[TrainSettings] = None) -> None:
 
 
 def predict(settings: Optional[PredictSettings] = None) -> None:
-    """
-    Generate predictions using a trained model.
-
-    Args:
-        settings: Prediction settings
-    """
     if settings is None:
         try:
-            # We need to provide the required parameters
             settings = PredictSettings(
                 model_path=Path("./output/lightgbm_model/model.pkl"),
                 data_path=Path("./data/penguins_size.csv"),
@@ -116,17 +96,13 @@ def predict(settings: Optional[PredictSettings] = None) -> None:
             logger.exception("Error loading prediction settings", error=str(e))
             raise SystemExit(1)
 
-    # Load configuration
     try:
         config = load_config(settings.config_path)
 
-        # Initialize environment
         initialize_environment(config)
 
-        # Override data path
         config.data.input_path = settings.data_path
 
-        # Run prediction
         run_prediction(
             settings.model_path, settings.data_path, settings.output_path, config
         )
@@ -137,9 +113,6 @@ def predict(settings: Optional[PredictSettings] = None) -> None:
 
 
 def main() -> None:
-    """
-    Main entry point for the CLI.
-    """
     import sys
 
     if len(sys.argv) < 2:

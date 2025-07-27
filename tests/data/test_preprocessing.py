@@ -95,7 +95,12 @@ def test_preprocess_data_missing_values(sample_data):
     result = preprocess_data(train_df, val_df, test_df)
 
     # Check that numeric features don't have nulls
-    for column in ["culmen_length_mm", "culmen_depth_mm", "flipper_length_mm", "body_mass_g"]:
+    for column in [
+        "culmen_length_mm",
+        "culmen_depth_mm",
+        "flipper_length_mm",
+        "body_mass_g",
+    ]:
         assert not result.test_features[column].is_null().any()
 
     # Verify that island was imputed in test data

@@ -58,7 +58,7 @@ class LightGBMModel(BaseModel):
             train_set=dtrain,
             valid_sets=[dtrain] + (eval_set or []),
             valid_names=["train"] + (["valid"] if eval_set else []),
-            callbacks=[lgb.record_evaluation(eval_results)]
+            callbacks=[lgb.record_evaluation(eval_results)],
         )
 
         metrics: Dict[str, float] = {}

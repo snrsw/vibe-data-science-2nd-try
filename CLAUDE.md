@@ -74,10 +74,11 @@ See `docs/problem.md` for the problem statement, inputs, outputs, and evaluation
 * Do not use comments to explain code. Instead, use descriptive variable and function names.
 * Use explicit named arguments for function calls.
 * Use structured logging with the `structlog` module, do not use print statements for debugging.
+* Use plotly for visualizations, and save plots as images rather than displaying them inline.
 
 ## Development Workflow
 
-* Use t-wada's TDD style (see Japanese resources for more tdetails).
+* Use t-wada's TDD style (see Japanese resources for more details).
 * Plan first, then implement if the owner agrees with the plan.
 * Check linting and type checking before committing code.
 * Run tests before committing code.

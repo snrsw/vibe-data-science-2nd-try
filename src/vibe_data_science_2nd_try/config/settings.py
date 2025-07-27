@@ -26,7 +26,6 @@ class ModelConfig(BaseModel):
         super().__init__(**data)
         model_type = self.model_type
 
-        # Apply default hyperparameters if none provided
         if not self.hyperparameters:
             if model_type == "lightgbm":
                 self.hyperparameters = {

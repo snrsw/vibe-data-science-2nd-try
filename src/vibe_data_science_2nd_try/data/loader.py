@@ -15,15 +15,13 @@ def load_penguin_data(file_path: str | Path) -> pl.DataFrame:
 
     logger.info("Loading penguin dataset", path=str(path))
 
-    df = pl.read_csv(path)
+    df: pl.DataFrame = pl.read_csv(source=path)
 
-    # Validate column names
     missing_columns = set(PenguinDataSchema.column_names) - set(df.columns)
     if missing_columns:
         logger.error("Missing required columns", missing_columns=list(missing_columns))
         raise ValueError(f"Missing required columns: {missing_columns}")
 
-    # Convert column types
     for column, dtype in PenguinDataSchema.dtypes.items():
         if column in df.columns:
             df = df.with_columns(pl.col(column).cast(dtype))
@@ -54,27 +52,26 @@ def split_data(
         random_state=random_state,
     )
 
-    # Calculate split ratios
-    total_rows = df.shape[0]
+    total_rows: int = df.shape[0]
     test_rows = int(total_rows * test_size)
     val_rows = int(total_rows * validation_size)
-    train_rows = total_rows - test_rows - val_rows
+    train_rows: int = total_rows - test_rows - val_rows
 
-    # Create a shuffled dataframe with a row index column
     shuffled_df = df.with_row_index("__index").sample(
         fraction=1.0, shuffle=True, seed=random_state
     )
 
-    # Split into train, validation, and test dataframes
-    train_df = shuffled_df.filter(pl.col("__index") < train_rows).drop("__index")
+    train_df: pl.DataFrame = shuffled_df.filter(pl.col("__index") < train_rows).drop(
+        "__index"
+    )
 
-    val_df = shuffled_df.filter(
+    val_df: pl.DataFrame = shuffled_df.filter(
         (pl.col("__index") >= train_rows) & (pl.col("__index") < train_rows + val_rows)
     ).drop("__index")
 
-    test_df = shuffled_df.filter(pl.col("__index") >= train_rows + val_rows).drop(
-        "__index"
-    )
+    test_df: pl.DataFrame = shuffled_df.filter(
+        pl.col("__index") >= train_rows + val_rows
+    ).drop("__index")
 
     logger.info(
         "Dataset split complete",

@@ -38,9 +38,14 @@ def preprocess_data(
 
     preprocessor_state: dict[str, Any] = {}
 
-    train_target: pl.Series = train_df.select(PenguinDataSchema.target_column).to_series()
+    train_target: pl.Series = train_df.select(
+        PenguinDataSchema.target_column
+    ).to_series()
+    train_target = train_target.rename(PenguinDataSchema.target_column)
     val_target: pl.Series = val_df.select(PenguinDataSchema.target_column).to_series()
+    val_target = val_target.rename(name=PenguinDataSchema.target_column)
     test_target: pl.Series = test_df.select(PenguinDataSchema.target_column).to_series()
+    test_target = test_target.rename(name=PenguinDataSchema.target_column)
 
     train_features: pl.DataFrame = train_df.select(
         PenguinDataSchema.feature_columns + PenguinDataSchema.categorical_columns
@@ -54,46 +59,57 @@ def preprocess_data(
 
     for col in PenguinDataSchema.feature_columns:
         if imputation_strategy == "median":
-            fill_value: float = train_features.select(pl.col(col)).drop_nulls().median()[0, 0]
+            fill_value: float = (
+                train_features.select(pl.col(name=col)).drop_nulls().median()[0, 0]
+            )
             preprocessor_state[f"{col}_imputation_value"] = fill_value
 
             train_features = train_features.with_columns(
-                pl.col(col).fill_null(fill_value)
+                pl.col(name=col).fill_null(value=fill_value)
             )
             val_features = val_features.with_columns(pl.col(col).fill_null(fill_value))
             test_features = test_features.with_columns(
-                pl.col(col).fill_null(fill_value)
+                pl.col(name=col).fill_null(fill_value)
             )
         elif imputation_strategy == "mean":
-            fill_value: float = train_features.select(pl.col(col)).drop_nulls().mean()[0, 0]
+            fill_value: float = (
+                train_features.select(pl.col(col)).drop_nulls().mean()[0, 0]
+            )
             preprocessor_state[f"{col}_imputation_value"] = fill_value
 
             train_features = train_features.with_columns(
-                pl.col(col).fill_null(fill_value)
+                pl.col(name=col).fill_null(value=fill_value)
             )
             val_features = val_features.with_columns(pl.col(col).fill_null(fill_value))
             test_features = test_features.with_columns(
-                pl.col(col).fill_null(fill_value)
+                pl.col(name=col).fill_null(fill_value)
             )
 
     for col in PenguinDataSchema.categorical_columns:
         if train_features.select(pl.col(col).null_count()).item() > 0:
-            value_counts: pl.DataFrame = train_features.select(pl.col(col)).drop_nulls().to_series().value_counts()
-            most_common: str = value_counts.filter(pl.col(value_counts.columns[0]) == value_counts.row(0)[0])[0, 0]
+            value_counts: pl.DataFrame = (
+                train_features.select(pl.col(col))
+                .drop_nulls()
+                .to_series()
+                .value_counts()
+            )
+            most_common: str = value_counts.filter(
+                pl.col(value_counts.columns[0]) == value_counts.row(0)[0]
+            )[0, 0]
             preprocessor_state[f"{col}_imputation_value"] = most_common
 
             train_features = train_features.with_columns(
-                pl.col(col).fill_null(most_common)
+                pl.col(name=col).fill_null(most_common)
             )
             val_features = val_features.with_columns(pl.col(col).fill_null(most_common))
             test_features = test_features.with_columns(
-                pl.col(col).fill_null(most_common)
+                pl.col(name=col).fill_null(most_common)
             )
 
         unique_values: list[str] = (
-            train_features.select(pl.col(col))
+            train_features.select(pl.col(name=col))
             .unique()
-            .sort(col)
+            .sort(by=col)
             .to_series()
             .drop_nulls()
             .to_list()
@@ -103,13 +119,13 @@ def preprocess_data(
         for value in unique_values:
             column_name: str = f"{col}_{value}"
             train_features = train_features.with_columns(
-                (pl.col(col) == value).cast(pl.Int8).alias(column_name)
+                (pl.col(name=col) == value).cast(pl.Int8).alias(column_name)
             )
             val_features = val_features.with_columns(
-                (pl.col(col) == value).cast(pl.Int8).alias(column_name)
+                (pl.col(name=col) == value).cast(pl.Int8).alias(column_name)
             )
             test_features = test_features.with_columns(
-                (pl.col(col) == value).cast(pl.Int8).alias(column_name)
+                (pl.col(name=col) == value).cast(pl.Int8).alias(column_name)
             )
 
     train_features = train_features.drop(PenguinDataSchema.categorical_columns)
